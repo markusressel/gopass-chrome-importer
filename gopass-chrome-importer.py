@@ -182,9 +182,9 @@ def c_import(path: str, gopass_subpath: str, force: bool, yes: bool, dry_run: bo
 def c_store(filepath: str, force: bool, dry_run: bool):
     """
     Stores a password in the given file path.
+
     As it could be security critical to pass a password as a command line parameter this method uses an environment variable
     instead called "GOPASS_STORE_PASS"
-
     """
 
     final_secret_path = os.environ[SECRET_PATH_ENV_VARIABLE_NAME]
