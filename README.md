@@ -1,4 +1,4 @@
-# gopass-chrome-importer
+# gopass-chrome-importer  [![Build Status](https://travis-ci.org/markusressel/gopass-chrome-importer.svg?branch=master)](https://travis-ci.org/markusressel/gopass-chrome-importer)
 A simple tool to import Chrome passwords into [gopass](https://github.com/gopasspw/gopass).
 
 # How it works
