@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
-import click
-import subprocess
-import re
 import os
-
+import subprocess
 from enum import Enum
+
+import click
 
 SECRET_PATH_ENV_VARIABLE_NAME = 'GOPASS_STORE_SECRET_PATH'
 USERNAME_ENV_VARIABLE_NAME = 'GOPASS_STORE_USER'
@@ -108,24 +107,24 @@ def cli():
 
 
 @cli.command(name="import")
-@click.option('-path', '-p', required=True, type=str, help='Path to the chrome password export .csv file.')
-@click.option('-gopass-subpath', '-gp', required=False, type=str, default="imported/",
+@click.option('--path', '-p', required=True, type=str, help='Path to the chrome password export .csv file.')
+@click.option('--gopass-basepath', '-gb', required=False, type=str, default="imported/",
               help='The path in gopass where all entries are imported to.')
-@click.option('-f', '--force', required=False, default=False, is_flag=True,
+@click.option('--force', '-f', required=False, default=False, is_flag=True,
               help='When set existing passwords will be overwritten. USE WITH CAUTION!')
-@click.option('--yes', required=False, default=False, is_flag=True,
+@click.option('--yes', '-y', required=False, default=False, is_flag=True,
               help='When set no questions will be asked during execution. '
                    'This effectively sets the --yes flag on gopass. '
                    'Note that this will NOT overwrite any existing data (see "-f" to do that)')
-@click.option('--dry-run', required=False, default=False, is_flag=True,
+@click.option('--dry-run', '-d', required=False, default=False, is_flag=True,
               help='When set no passwords will actually be written and a preview of what WOULD be done will be printed.')
-def c_import(path: str, gopass_subpath: str, force: bool, yes: bool, dry_run: bool):
+def c_import(path: str, gopass_basepath: str, force: bool, yes: bool, dry_run: bool):
     """Imports all items in the chrome password export"""
 
     path_to_this_script = os.path.abspath(__file__)
 
     # set custom "editor" that will process the password
-    editor_command = "python3 '%s' store" % path_to_this_script
+    editor_command = "python3 '%s' store_internal" % path_to_this_script
     if force:
         editor_command += " -f"
     if dry_run:
@@ -147,7 +146,7 @@ def c_import(path: str, gopass_subpath: str, force: bool, yes: bool, dry_run: bo
             rolling_counter_for_website = 0
             user = "site_pw_%s" % rolling_counter_for_website
 
-        secret_path = "%s%s/%s" % (gopass_subpath, site, user)
+        secret_path = "%s%s/%s" % (gopass_basepath, site, user)
         password = entry["password"]
 
         # this command is a simple workaround to use gopass in a non-interactive way
@@ -173,25 +172,26 @@ def c_import(path: str, gopass_subpath: str, force: bool, yes: bool, dry_run: bo
     click.echo("Done.")
 
 
-@cli.command(name="store")
-@click.argument('filepath', required=True, type=str)
-@click.option('-f', "--force", required=False, default=False, is_flag=True,
+@cli.command(name="store_internal", hidden=True)
+@click.argument('file_path', required=True, type=str)
+@click.option("--force", '-f', required=False, default=False, is_flag=True,
               help='When set to true existing passwords will be overwritten. USE WITH CAUTION!')
-@click.option('--dry-run', required=False, default=False, is_flag=True,
+@click.option('--dry-run', '-d', required=False, default=False, is_flag=True,
               help='When set no passwords will actually be written and a preview of what WOULD be done will be printed.')
-def c_store(filepath: str, force: bool, dry_run: bool):
+def c_store_internal(file_path: str, force: bool, dry_run: bool):
     """
+    NOTE: This is an internal command and not meant to be used from outside.
     Stores a password in the given file path.
 
-    As it could be security critical to pass a password as a command line parameter this method uses an environment variable
-    instead called "GOPASS_STORE_PASS"
+    As it could be security critical to pass a password as a command line parameter this method uses
+    an environment variable instead.
     """
 
     final_secret_path = os.environ[SECRET_PATH_ENV_VARIABLE_NAME]
 
     # check if the file is empty
-    statinfo = os.stat(filepath)
-    if statinfo.st_size is not 0:
+    file_stats = os.stat(file_path)
+    if file_stats.st_size is not 0:
         if not force:
             click.echo(click.style("Non-empty file will NOT be overwritten: %s" % final_secret_path, fg='yellow'))
             return
@@ -212,10 +212,10 @@ def c_store(filepath: str, force: bool, dry_run: bool):
         text_to_write += "user: %s" % username
 
     if dry_run:
-        # execute the command
+        # just print what would be executed
         click.echo(text_to_write + '\n')
     else:
-        with open(filepath, 'w') as file:
+        with open(file_path, 'w') as file:
             file.write(text_to_write)
 
 
