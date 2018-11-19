@@ -14,14 +14,14 @@ and loops over each entry in the list which provides
 ## Determining the secret file path
 
 1. Since not only website passwords are stored in chrome secrets are are divided into categories 
-which are later used as subfolders when creating the actual secret in gopass. 
-2. Next the url is simplified based on the category to provide an easy to understand secret name.
+which are later used as subfolders when creating the actual secrets in gopass. 
+2. Next the url is simplified based on the category to provide a human readable name for the secret.
 3. To improve usability with the gopass chrome and firefox plugin the username is used as the file name of the secret.
 
 * `website`
   * url are stripped down to only contain the domain (and all subdomains) f.ex. `/import/website/`
 * `ip`
-  * since saved passwords based on IPs can be duplicates based on the network your in
+  * since saved passwords based on IPs can be duplicates based on the network you are in
     these passwords are sorted into their own category and the url is stripped to only contain the IP (v4)
   * IPv6 is currently not detected and would be handled as website
 * `android`
@@ -30,7 +30,7 @@ which are later used as subfolders when creating the actual secret in gopass.
 ## Secret file content
 
 The first line of a secret is always supposed to be a password 
-with additional info added below seperated by a `---` divider.
+with additional info added below separated by a `---` divider.
 When a username is available it will be added to the additional info section
 which can then be used by the chrome and firefox plugin:
 
@@ -50,10 +50,13 @@ mypassword1234
 
 Since **gopass** does not provide a non-interactive way to create or modify secrets the fact that
 secrets can not only be edited but also created using the `gopass edit` command is used to work around this
-(security related) limitation. **gopass** creates a temporary decrypted file inside `/dev/shm` which is then
-passed to `$EDITOR`. **gopass-chrome-importer** uses this to it's advantage and writes itself into that env variable
-to process the temporarily decrypted file. First of all the existing file is checked to prevent overwriting of
-existing secret data. If those checks succeed the secret is written in the form described above. 
+(security related) limitation. When executing `gopass edit /some/secret` **gopass** creates a temporary decrypted 
+file inside `/dev/shm` for this secret which is then passed to `$EDITOR`. **gopass-chrome-importer** uses this to 
+its advantage and writes itself into that env variable to process the temporarily decrypted file. 
+First of all the existing file is checked to prevent overwriting of existing secret data. 
+If those checks succeed the secret is written to the file in the form described above.
+After that **gopass** encrypts the temporary file with the selected recipients and (if a remote is available) 
+pushes it to the server. 
 
 
 # Installing
