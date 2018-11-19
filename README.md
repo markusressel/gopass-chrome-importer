@@ -85,8 +85,25 @@ gopass-chrome-importer import --help
 ## Dry Run
 
 To test things out before actually importing passwords into **gopass** (and possibly 
-pushing them to origin) you can use the `-d` or `--dry-run` option.  
-For safety example commands on this page will include this option. 
+pushing them to origin) you can use the `-d` or `--dry-run` option. This will only output
+secret paths and contents where passwords are masked as asterisks to give you an idea of what would 
+happen.
+
+An example output would look similar to this:
+```text
+Would import: /import/ip/127.0.0.1/joe
+******
+---
+user: joe
+
+Would import: /import/ip/192.168.0.1/admin
+********************
+---
+user: admin
+```
+
+For safety **all** examples on this page will include this option. 
+
 
 ## Set the path to the chrome password export .csv
 
@@ -107,9 +124,9 @@ gopass-chrome-importer import --path "~/Downloads/Chrome Passwords.csv" --gopass
 
 ## --yes
 
-By default gopass will ask you some questions when creating a secret like which recipients to use for this secret.
+By default **gopass** will ask you some questions when creating a secret like which recipients to use for this secret.
 For large lists of passwords this can be quite a hassle. **gopass** has a built in `--yes` option to circumvent this 
-by always using "Y" or the default (if yes is not an option). This paramter can also be used (in addition to `-y`)
+by always using "Y" or the default (if *yes* is not an option). This parameter can also be used (in addition to `-y`)
 in **gopass-chrome-importer** and will just pass it on to **gopass**.
 
 ```bash
@@ -119,11 +136,10 @@ gopass-chrome-importer import --path "~/Downloads/Chrome Passwords.csv" --gopass
 ## Overwrite existing passwords/file contents
 
 When **gopass-chrome-importer** tries to save a password in a file that
-already exists and is **not** empty it will (by default) not change the file contents
-to prevent accidentally overwriting existing passwords.
+already exists and that file is **not** empty it will (by default) **not change the file contents**
+to prevent accidentally overwriting of existing passwords.
 
-You can force **gopass-chrome-importer** into ignoring existing files by using
-the `-f` or `--force` option.
+You can force **gopass-chrome-importer** to ignore this check by using the `-f` or `--force` option.
 
 Although your existing passwords are backed up in a git and (hopefully) synced to a 
 server side backend **be careful and think twice before using this option.**
