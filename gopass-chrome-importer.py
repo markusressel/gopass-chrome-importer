@@ -7,6 +7,7 @@ import os
 
 from enum import Enum
 
+SECRET_PATH_ENV_VARIABLE_NAME = 'GOPASS_STORE_SECRET_PATH'
 USERNAME_ENV_VARIABLE_NAME = 'GOPASS_STORE_USER'
 PASSWORD_ENV_VARIABLE_NAME = 'GOPASS_STORE_PASS'
 EDITOR_ENV_VARIABLE_NAME = 'EDITOR'
@@ -121,10 +122,19 @@ def cli():
 def c_import(path: str, gopass_subpath: str, force: bool, yes: bool, dry_run: bool):
     """Imports all items in the chrome password export"""
 
+    path_to_this_script = os.path.abspath(__file__)
+
+    # set custom "editor" that will process the password
+    editor_command = "python3 '%s' store" % path_to_this_script
+    if force:
+        editor_command += " -f"
+    if dry_run:
+        editor_command += " --dry-run"
+    os.environ[EDITOR_ENV_VARIABLE_NAME] = editor_command
+
     entries = _read_csv(path)
 
     for entry in entries:
-
         if entry["name"]:
             site = _format_site(entry["name"])
         else:
@@ -145,18 +155,12 @@ def c_import(path: str, gopass_subpath: str, force: bool, yes: bool, dry_run: bo
         # stores the password in the temporarily decrypted file until
         # gopass encrypts it.
 
-        # store username in an env variable
+        # store final path to the secret in an env variable
+        os.environ[SECRET_PATH_ENV_VARIABLE_NAME] = secret_path
+        # store username
         os.environ[USERNAME_ENV_VARIABLE_NAME] = user
-        # store password in an env variable
+        # store password
         os.environ[PASSWORD_ENV_VARIABLE_NAME] = password
-
-        # set custom "editor" that will process the password
-        editor_command = "python3 gopass-chrome-importer.py store"
-        if force:
-            editor_command += " -f"
-        if dry_run:
-            editor_command += " --dry-run"
-        os.environ[EDITOR_ENV_VARIABLE_NAME] = editor_command
 
         # append the actual gopass command
         gopass_command = "gopass"
@@ -164,9 +168,6 @@ def c_import(path: str, gopass_subpath: str, force: bool, yes: bool, dry_run: bo
             gopass_command += " --yes"
         gopass_command += " edit '%s'" % secret_path
 
-        # execute the command
-        if dry_run:
-            click.echo("Would import: %s" % secret_path)
         _run_shell_command(gopass_command)
 
     click.echo("Done.")
@@ -186,20 +187,23 @@ def c_store(filepath: str, force: bool, dry_run: bool):
 
     """
 
+    final_secret_path = os.environ[SECRET_PATH_ENV_VARIABLE_NAME]
+
     # check if the file is empty
     statinfo = os.stat(filepath)
     if statinfo.st_size is not 0:
         if not force:
-            click.echo(click.style("Non-empty file will NOT be overridden: %s" % filepath, fg='yellow'))
+            click.echo(click.style("Non-empty file will NOT be overwritten: %s" % final_secret_path, fg='yellow'))
             return
         else:
-            click.echo(click.style("Non-empty file WILL BE overridden: %s" % filepath, fg='yellow'))
+            click.echo(click.style("Non-empty file WILL BE overwritten: %s" % final_secret_path, fg='yellow'))
 
     username = os.environ[USERNAME_ENV_VARIABLE_NAME]
     password = os.environ[PASSWORD_ENV_VARIABLE_NAME]
 
     if dry_run:
-        text_to_write = '*' * len(password)
+        text_to_write = "Would import: %s\n" % final_secret_path
+        text_to_write += '*' * len(password)
     else:
         text_to_write = password
 
@@ -208,6 +212,7 @@ def c_store(filepath: str, force: bool, dry_run: bool):
         text_to_write += "user: %s" % username
 
     if dry_run:
+        # execute the command
         click.echo(text_to_write + '\n')
     else:
         with open(filepath, 'w') as file:
