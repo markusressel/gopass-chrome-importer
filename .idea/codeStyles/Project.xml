@@ -1,0 +1,8 @@
+<component name="ProjectCodeStyleConfiguration">
+  <code_scheme name="Project" version="173">
+    <CsvCodeStyleSettings>
+      <option name="TABULARIZE" value="false" />
+      <option name="WHITE_SPACES_OUTSIDE_QUOTES" value="false" />
+    </CsvCodeStyleSettings>
+  </code_scheme>
+</component>
