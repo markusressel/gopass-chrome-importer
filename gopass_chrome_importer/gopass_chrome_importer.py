@@ -143,9 +143,7 @@ def c_import(path: str, gopass_basepath: str, force: bool, yes: bool, dry_run: b
         if entry["username"]:
             user = entry["username"]
         else:
-            # TODO: generate username that will never collide with an existing one
-            rolling_counter_for_website = 0
-            user = "site_pw_%s" % rolling_counter_for_website
+            user = "site_pw"
 
         secret_path = "%s%s/%s" % (gopass_basepath, site, user)
         password = entry["password"]

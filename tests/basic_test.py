@@ -1,24 +1,21 @@
-import os
 import unittest
 
 from click.testing import CliRunner
 
 from gopass_chrome_importer.gopass_chrome_importer import cli
+from tests import DUMMY_FILE_PATH
 
 
 class TestBasicMethods(unittest.TestCase):
-    def test_base_usage(self):
-        """
 
+    def test_dry_run(self):
+        """
+        A simple dry run with the test file
         """
         runner = CliRunner()
-
-        testfile = os.path.join(os.path.dirname(__file__), 'dummy_csv_file.csv')
-        result = runner.invoke(cli, ['import', '-p', testfile, "-y"])
+        result = runner.invoke(cli, ['import', '-p', DUMMY_FILE_PATH, "-y", "--dry-run"])
 
         self.assertEqual(result.exit_code, 0)
-
-        # assert result.output == 'Hello Peter!\n'
 
 
 if __name__ == '__main__':
