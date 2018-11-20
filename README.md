@@ -13,17 +13,17 @@ and loops over each entry in the list which provides
 
 ## Determining the secret file path
 
-1. Since not only website passwords are stored in chrome secrets are are divided into categories 
+1. Since not only passwords for websites are stored in chrome all entries are divided into categories 
 which are later used as subfolders when creating the actual secrets in gopass. 
 2. Next the url is simplified based on the category to provide a human readable name for the secret.
 3. To improve usability with the gopass chrome and firefox plugin the username is used as the file name of the secret.
 
 * `website`
-  * url are stripped down to only contain the domain (and all subdomains) f.ex. `/import/website/`
+  * the url is stripped down to only contain the domain (and all subdomains) f.ex. `import/website/smile.amazon.com/your@mail.com`
 * `ip`
-  * since saved passwords based on IPs can be duplicates based on the network you are in
+  * since saved passwords of IPs can be duplicates based on the network you are in
     these passwords are sorted into their own category and the url is stripped to only contain the IP (v4)
-  * IPv6 is currently not detected and would be handled as website
+  * IPv6 is currently not detected and would be handled as a website
 * `android`
   * the url is stripped down to only contain the package of the app f.ex. `import/android/com.paypal.android.p2pmobile/your@mail.com`
 
