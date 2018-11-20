@@ -131,7 +131,6 @@ def c_import(path: str, gopass_basepath: str, force: bool, yes: bool, dry_run: b
     if dry_run:
         editor_command += " --dry-run"
     os.environ[EDITOR_ENV_VARIABLE_NAME] = editor_command
-    click.echo("Editor command: %s" % editor_command)
 
     entries = _read_csv(path)
 
