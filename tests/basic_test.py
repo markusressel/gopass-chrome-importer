@@ -14,7 +14,7 @@ class TestBasicMethods(unittest.TestCase):
         runner = CliRunner()
 
         testfile = os.path.join(os.path.dirname(__file__), 'dummy_csv_file.csv')
-        result = runner.invoke(cli, ['import', '-p', testfile], "-d")
+        result = runner.invoke(cli, ['import', '-p', testfile, "-y"])
 
         self.assertEqual(result.exit_code, 0)
 
