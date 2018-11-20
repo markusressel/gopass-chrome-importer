@@ -1,0 +1,8 @@
+name,url,username,password
+127.0.0.1,http://127.0.0.1:1234/login.wft,,ABCD1
+127.0.0.1,http://127.0.0.1:5833/login.wft,,ABCD2
+127.0.0.1,http://127.0.0.1:5833/login.wft,user,ABCD3
+www.amazon.de,https://www.amazon.de/ap/signin,my@mail.com,supersecretpassword
+smile.amazon.de,https://smile.amazon.de/ap/signin,my@mail.com,supersecretpassword
+smile.amazon.de,https://smile.amazon.de/ap/signin,myother@mail.com,evenmoresupersecretpassword
+,android://biubOBhziubziubIUbhiul56757KJjkjklJI787tnhoihjpoit638790798GBzugigbuGViu_fdsjk78hgHgu-JH6K9NB==@com.paypal.android.p2pmobile/,ihavemany@emails.com,changingpasswordsisfornoobs

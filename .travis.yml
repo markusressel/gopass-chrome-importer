@@ -5,6 +5,15 @@ python:
 - "3.6"
 - "3.7-dev"
 - "nightly" # currently points to 3.7-dev
+
+# setup gopass
+before_install:
+- wget -q -O- https://api.bintray.com/orgs/gopasspw/keys/gpg/public.key | sudo apt-key add -
+- echo "deb https://dl.bintray.com/gopasspw/gopass trusty main" | sudo tee /etc/apt/sources.list.d/gopass.list
+- sudo apt-get update
+- sudo apt-get install -y gopass
+- gopass --yes init
+
 # command to install dependencies
 install:
 - pip install .
