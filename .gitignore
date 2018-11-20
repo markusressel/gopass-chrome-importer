@@ -1,0 +1,5 @@
+dist
+build
+venv
+gopass_chrome_importer.egg-info
+*.iml
