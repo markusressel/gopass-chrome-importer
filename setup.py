@@ -82,7 +82,7 @@ setup(
     tests_require=test_requirements(),
     entry_points={
         'console_scripts': [
-            'gopass_chrome_importer=gopass_chrome_importer.gopass_chrome_importer:cli'
+            'gopass-chrome-importer=gopass_chrome_importer.gopass_chrome_importer:cli'
         ]
     }
 )

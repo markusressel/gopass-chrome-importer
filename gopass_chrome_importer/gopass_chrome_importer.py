@@ -101,7 +101,10 @@ def _format_site(url: str) -> str:
     return result
 
 
-@click.group()
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+
+
+@click.group(context_settings=CONTEXT_SETTINGS)
 def cli():
     pass
 
@@ -119,17 +122,16 @@ def cli():
 @click.option('--dry-run', '-d', required=False, default=False, is_flag=True,
               help='When set no passwords will actually be written and a preview of what WOULD be done will be printed.')
 def c_import(path: str, gopass_basepath: str, force: bool, yes: bool, dry_run: bool):
-    """Imports all items in the chrome password export"""
-
-    path_to_this_script = os.path.abspath(__file__)
+    """Imports items from a chrome password export"""
 
     # set custom "editor" that will process the password
-    editor_command = "python3 '%s' store_internal" % path_to_this_script
+    editor_command = "gopass-chrome-importer store_internal"
     if force:
         editor_command += " -f"
     if dry_run:
         editor_command += " --dry-run"
     os.environ[EDITOR_ENV_VARIABLE_NAME] = editor_command
+    click.echo("Editor command: %s" % editor_command)
 
     entries = _read_csv(path)
 
