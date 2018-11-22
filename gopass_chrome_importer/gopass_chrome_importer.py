@@ -93,7 +93,7 @@ def _format_site(url: str) -> str:
         # strip away everything except app package name
         matches = re.search("(?:==@)([\w\d.]*)", result)
         if not matches:
-            click.echo("No match found: %s" % url, err=True)
+            echo("No match found: %s" % url, err=True)
             exit(1)
 
         result = "android/" + matches.group(1)
@@ -168,7 +168,7 @@ def c_import(path: str, gopass_basepath: str, force: bool, yes: bool, dry_run: b
 
         _run_shell_command(gopass_command)
 
-    click.echo("Done.")
+    echo("Done.", info=True)
 
 
 def _create_secret_content(username: str or None, password: str, mask_pw: bool = False) -> str:
@@ -190,6 +190,27 @@ def _create_secret_content(username: str or None, password: str, mask_pw: bool =
         content += "user: %s" % username
 
     return content
+
+
+def echo(text: str, info: bool = False, warn: bool = False, err: bool = False) -> None:
+    """
+    Simple wrapper for the click.echo function
+    :param text: the text to print
+    :param info: set to true, when this is a info message
+    :param warn: set to true, when this is a warning message
+    :param err: set to true, when this is an error message
+    """
+
+    if info:
+        foreground_color = 'green'
+    elif warn:
+        foreground_color = 'yellow'
+    elif err:
+        foreground_color = 'red'
+    else:
+        foreground_color = 'white'
+
+    click.echo(click.style(text, fg=foreground_color), err=err)
 
 
 @cli.command(name="store_internal", hidden=True)
@@ -221,23 +242,19 @@ def c_store_internal(file_path: str, force: bool, dry_run: bool):
         with open(file_path, 'r') as file:
             existing_content = file.read()
             if existing_content == secret_content:
-                click.echo(click.style("Non-empty secret found, but content matches exactly so no action is taken.",
-                                       fg='green'))
+                echo("Non-empty secret with identical content ignored: %s" % final_secret_path, info=True)
                 return
 
         if not force:
-            click.echo(
-                click.style("Non-empty file with unequal content will NOT be overwritten: %s" % final_secret_path,
-                            fg='yellow'))
+            echo("Non-empty file with unequal content will NOT be overwritten: %s" % final_secret_path, warn=True)
             return
         else:
-            click.echo(click.style("Non-empty file with unequal content WILL BE overwritten: %s" % final_secret_path,
-                                   fg='yellow'))
+            echo("Non-empty file with unequal content WILL BE overwritten: %s" % final_secret_path, warn=True)
 
     if dry_run:
         # just print what would be executed
         secret_content = _create_secret_content(username, password, mask_pw=True)
-        click.echo("Would import: " + secret_content + '\n')
+        echo("Would import: " + secret_content + '\n')
         return
     else:
         with open(file_path, 'w') as file:
