@@ -171,6 +171,27 @@ def c_import(path: str, gopass_basepath: str, force: bool, yes: bool, dry_run: b
     click.echo("Done.")
 
 
+def _create_secret_content(username: str or None, password: str, mask_pw: bool = False) -> str:
+    """
+    Creates the text that is written to a secret
+
+    :param username: a username, if present
+    :param password: the password
+    :param mask_pw: when set to true the password will be masked
+    :return:
+    """
+    if mask_pw:
+        content = len(password) * '*'
+    else:
+        content = password
+
+    if username:
+        content += "\n---\n"
+        content += "user: %s" % username
+
+    return content
+
+
 @cli.command(name="store_internal", hidden=True)
 @click.argument('file_path', required=True, type=str)
 @click.option("--force", '-f', required=False, default=False, is_flag=True,
@@ -188,34 +209,40 @@ def c_store_internal(file_path: str, force: bool, dry_run: bool):
 
     final_secret_path = os.environ[SECRET_PATH_ENV_VARIABLE_NAME]
 
-    # check if the file is empty
-    file_stats = os.stat(file_path)
-    if file_stats.st_size is not 0:
-        if not force:
-            click.echo(click.style("Non-empty file will NOT be overwritten: %s" % final_secret_path, fg='yellow'))
-            return
-        else:
-            click.echo(click.style("Non-empty file WILL BE overwritten: %s" % final_secret_path, fg='yellow'))
-
     username = os.environ[USERNAME_ENV_VARIABLE_NAME]
     password = os.environ[PASSWORD_ENV_VARIABLE_NAME]
 
-    if dry_run:
-        text_to_write = "Would import: %s\n" % final_secret_path
-        text_to_write += '*' * len(password)
-    else:
-        text_to_write = password
+    secret_content = _create_secret_content(username, password)
 
-    if username:
-        text_to_write += "\n---\n"
-        text_to_write += "user: %s" % username
+    # check if the file is empty
+    file_stats = os.stat(file_path)
+    if file_stats.st_size is not 0:
+        # check if existing content matches the one we are about to write
+        with open(file_path, 'r') as file:
+            existing_content = file.read()
+            if existing_content == secret_content:
+                click.echo(click.style("Non-empty secret found, but content matches exactly so no action is taken.",
+                                       fg='green'))
+                return
+
+        if not force:
+            click.echo(
+                click.style("Non-empty file with unequal content will NOT be overwritten: %s" % final_secret_path,
+                            fg='yellow'))
+            return
+        else:
+            click.echo(click.style("Non-empty file with unequal content WILL BE overwritten: %s" % final_secret_path,
+                                   fg='yellow'))
 
     if dry_run:
         # just print what would be executed
-        click.echo(text_to_write + '\n')
+        secret_content = _create_secret_content(username, password, mask_pw=True)
+        click.echo("Would import: " + secret_content + '\n')
+        return
     else:
         with open(file_path, 'w') as file:
-            file.write(text_to_write)
+            file.write(secret_content)
+        return
 
 
 if __name__ == '__main__':
