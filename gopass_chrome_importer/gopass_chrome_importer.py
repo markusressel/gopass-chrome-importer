@@ -135,7 +135,8 @@ def c_import(path: str, gopass_basepath: str, force: bool, yes: bool, dry_run: b
     entries = _read_csv(path)
 
     for entry in entries:
-        if entry.get("website") == "website" and entry.get("name") == "name" and entry.get("password") == "password":
+        if entry.get("name") == "name" and entry.get("url") == "url" and entry.get(
+                "username") == "username" and entry.get("password") == "password":
             # this is the header of the csv file and can be ignored
             # it would be possible to just ignore the first line of the csv
             # but you never know wo might think it's a good idea to delete that...
