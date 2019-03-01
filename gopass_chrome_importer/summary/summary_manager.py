@@ -14,7 +14,7 @@ class SummaryManager:
     _warnings = "warnings"
     _errors = "errors"
 
-    _default_summary_items: dict = {
+    _default_summary_items = {
         _infos: [],
         _warnings: [],
         _errors: []
