@@ -324,13 +324,12 @@ def c_store_internal(file_path: str, force: bool, dry_run: bool):
     if dry_run:
         # just print what would be executed
         secret_content = _create_secret_content(username, password, mask_pw=True)
-        echo("Would import: %s\n" % secret_content, info=True)
+        echo("%s:\n%s\n" % (final_secret_path, secret_content), info=True)
         SUMMARY_MANAGER.add_info("Would import: %s" % final_secret_path)
         return
     else:
         with open(file_path, 'w') as file:
             file.write(secret_content)
-        echo("Imported %s" % final_secret_path, info=True)
         SUMMARY_MANAGER.add_info("Imported %s" % final_secret_path)
         return
 

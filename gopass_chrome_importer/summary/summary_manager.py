@@ -143,7 +143,7 @@ class SummaryManager:
         text = ""
         for info in infos:
             text += str(info) + "\n"
-        click.echo(text)
+        click.echo(click.style(text, fg='green'))
 
         text = ""
         for warning in warnings:
