@@ -130,7 +130,7 @@ class SummaryManager:
         errors = summary[self._errors]
         warnings = summary[self._warnings]
 
-        summary_title = "Summary"
+        summary_title = "Summary (%s warning(s), %s error(s))" % (len(warnings), len(errors))
         text = "%s\n" % summary_title + ('=' * len(summary_title)) + "\n"
         click.echo(click.style(text, fg='white'))
 
