@@ -1,6 +1,6 @@
 class GopassImporterError:
-    secret_path: str
-    error_text: str
+    secret_path = ""
+    error_text = ""
 
     def __init__(self, secret_path: str, error_text: str):
         self.secret_path = secret_path
@@ -8,8 +8,8 @@ class GopassImporterError:
 
 
 class GopassImporterWarning:
-    secret_path: str
-    warning_text: str
+    secret_path = ""
+    warning_text = ""
 
     def __init__(self, secret_path: str, warning_text: str):
         self.secret_path = secret_path

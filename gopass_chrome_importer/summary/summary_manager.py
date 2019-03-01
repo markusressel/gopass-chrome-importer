@@ -20,7 +20,7 @@ class SummaryManager:
         _errors: []
     }
 
-    tmp_file_path: str
+    tmp_file_path = ""
 
     def __init__(self, tmp_file_path: str or None = None):
         """
