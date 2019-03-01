@@ -17,10 +17,10 @@ class CiOnlyTests(unittest.TestCase):
             print("Not running on CI, ignoring CI test.")
             return
 
-        runner = CliRunner()
-        result = runner.invoke(cli, ['import', '-p', DUMMY_FILE_PATH, "-y"])
-
-        self.assertEqual(result.exit_code, 0)
+        runner = CliRunner(echo_stdin=True)
+        prog_name = runner.get_default_prog_name(cli)
+        args = ['import', '-p', DUMMY_FILE_PATH, "-y"]
+        cli.main(args=args or (), prog_name=prog_name, standalone_mode=False)
 
 
 if __name__ == '__main__':
