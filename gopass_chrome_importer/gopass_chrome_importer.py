@@ -8,9 +8,10 @@ import click
 
 from gopass_chrome_importer.summary.summary_manager import SummaryManager
 
-SECRET_PATH_ENV_VARIABLE_NAME = 'GOPASS_STORE_SECRET_PATH'
-USERNAME_ENV_VARIABLE_NAME = 'GOPASS_STORE_USER'
-PASSWORD_ENV_VARIABLE_NAME = 'GOPASS_STORE_PASS'
+SUMMARY_TMP_FILE_ENV_VARIABLE_NAME = 'GOPASS_CHROME_IMPORTER_SUMMARY_TMP_FILE_PATH'
+SECRET_PATH_ENV_VARIABLE_NAME = 'GOPASS_CHROME_IMPORTER_STORE_SECRET_PATH'
+USERNAME_ENV_VARIABLE_NAME = 'GOPASS_CHROME_IMPORTER_STORE_USER'
+PASSWORD_ENV_VARIABLE_NAME = 'GOPASS_CHROME_IMPORTER_STORE_PASS'
 EDITOR_ENV_VARIABLE_NAME = 'EDITOR'
 IPV4_REGEX = "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
 
@@ -166,8 +167,6 @@ def c_import(path: str, gopass_basepath: str, force: bool, yes: bool, dry_run: b
     :param dry_run: If set to True no changes will be made to the gopass store
     """
 
-    SUMMARY_MANAGER.clear()
-
     # set custom "editor" that will process the password
     editor_command = "gopass-chrome-importer %s" % CMD_STORE_INTERNAL
     if force:
@@ -175,6 +174,9 @@ def c_import(path: str, gopass_basepath: str, force: bool, yes: bool, dry_run: b
     if dry_run:
         editor_command += " %s" % get_option_names(PARAM_DRY_RUN)[0]
     os.environ[EDITOR_ENV_VARIABLE_NAME] = editor_command
+
+    # set path to summary tmp file used for this run
+    os.environ[SUMMARY_TMP_FILE_ENV_VARIABLE_NAME] = SUMMARY_MANAGER.get_tmp_file_path()
 
     entries = _read_csv(path)
 
@@ -293,6 +295,8 @@ def c_store_internal(file_path: str, force: bool, dry_run: bool):
     :param force: When set to true existing passwords will be overwritten. USE WITH CAUTION!
     :param dry_run: When set no passwords will actually be written and a preview of what WOULD be done will be printed.
     """
+
+    SUMMARY_MANAGER.set_tmp_file(os.environ[SUMMARY_TMP_FILE_ENV_VARIABLE_NAME])
 
     final_secret_path = os.environ[SECRET_PATH_ENV_VARIABLE_NAME]
 
