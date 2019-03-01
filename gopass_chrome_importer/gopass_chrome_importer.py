@@ -178,6 +178,10 @@ def c_import(path: str, gopass_basepath: str, force: bool, yes: bool, dry_run: b
     # set path to summary tmp file used for this run
     os.environ[SUMMARY_TMP_FILE_ENV_VARIABLE_NAME] = SUMMARY_MANAGER.get_tmp_file_path()
 
+    # TODO: maybe we could use this to be able to only update existing secrets, without creating new ones
+    # dont know if this is an actual usecase though...
+    create_new = True
+
     entries = _read_csv(path)
 
     for entry in entries:
@@ -219,9 +223,6 @@ def c_import(path: str, gopass_basepath: str, force: bool, yes: bool, dry_run: b
             gopass_command += " --yes"
         gopass_command += " edit"
 
-        # TODO: maybe we could use this to be able to only update existing secrets, without creating new ones
-        # dont know if this is an actual usecase though...
-        create_new = True
         if create_new:
             gopass_command += " --create"
 
