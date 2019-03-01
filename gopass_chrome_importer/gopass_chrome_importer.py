@@ -209,7 +209,15 @@ def c_import(path: str, gopass_basepath: str, force: bool, yes: bool, dry_run: b
         gopass_command = "gopass"
         if yes:
             gopass_command += " --yes"
-        gopass_command += " edit '%s'" % secret_path
+        gopass_command += " edit"
+
+        # TODO: maybe we could use this to be able to only update existing secrets, without creating new ones
+        # dont know if this is an actual usecase though...
+        create_new = True
+        if create_new:
+            gopass_command += " --create"
+
+        gopass_command += " '%s'" % secret_path
 
         _run_shell_command(gopass_command)
 
