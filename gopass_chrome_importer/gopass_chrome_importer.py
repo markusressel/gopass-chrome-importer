@@ -267,10 +267,10 @@ def echo(text: str, info: bool = False, warn: bool = False, err: bool = False) -
         foreground_color = 'green'
     elif warn:
         foreground_color = 'yellow'
-        SUMMARY_MANAGER.add_warning("", text)
+        SUMMARY_MANAGER.add_warning(text)
     elif err:
         foreground_color = 'red'
-        SUMMARY_MANAGER.add_error("", text)
+        SUMMARY_MANAGER.add_error(text)
     else:
         foreground_color = 'white'
 

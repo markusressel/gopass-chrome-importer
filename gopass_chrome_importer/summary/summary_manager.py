@@ -6,8 +6,6 @@ import string
 
 import click
 
-from gopass_chrome_importer.summary import GopassImporterWarning, GopassImporterError
-
 
 class SummaryManager:
     _infos = "infos"
@@ -88,47 +86,43 @@ class SummaryManager:
         """
         shutil.rmtree(os.path.dirname(self.tmp_file_path), ignore_errors=True)
 
-    def add_warning(self, secret_path: str, text: str) -> None:
+    def add_info(self, text: any) -> None:
+        """
+        Add an info message to the summary
+        :param text: the text to add
+        """
+        self._append_to_summary(text)
+
+    def add_warning(self, text: any) -> None:
         """
         Add a warning to the summary
-        :param secret_path:
-        :param text:
+        :param text: warning message
         """
+        self._append_to_summary(text, warn=True)
 
-        warning = GopassImporterWarning(secret_path, text)
-        self._append_to_summary(warning)
-
-    def add_error(self, secret_path: str, text: str) -> None:
+    def add_error(self, text: any) -> None:
         """
         Add an error to the summary
-        :param secret_path:
-        :param text:
+        :param text: error message
         """
-        error = GopassImporterError(secret_path, text)
-        self._append_to_summary(error)
+        self._append_to_summary(text, error=True)
 
-    def _append_to_summary(self, item: GopassImporterError or GopassImporterWarning or str) -> None:
+    def _append_to_summary(self, item: any, warn: bool = False, error: bool = False) -> None:
         """
         Appends an item to the summary
         :param item:
         """
         summary = self.read_from_filesystem()
 
-        if item is GopassImporterError:
-            summary[self._warnings].append(item)
-        elif item is GopassImporterWarning:
-            summary[self._errors].append(item)
+        text = str(item)
+        if error:
+            summary[self._errors].append(text)
+        elif warn:
+            summary[self._warnings].append(text)
         else:
-            summary[self._infos].append(str(item))
+            summary[self._infos].append(text)
 
         self._write_to_filesystem(summary)
-
-    def add_info(self, text) -> None:
-        """
-        Add an info message to the summary
-        :param text: the text to add
-        """
-        self._append_to_summary(text)
 
     def print_summary(self):
         summary = self.read_from_filesystem()
