@@ -6,6 +6,8 @@ from enum import Enum
 
 import click
 
+from gopass_chrome_importer.summary.summary_manager import SummaryManager
+
 SECRET_PATH_ENV_VARIABLE_NAME = 'GOPASS_STORE_SECRET_PATH'
 USERNAME_ENV_VARIABLE_NAME = 'GOPASS_STORE_USER'
 PASSWORD_ENV_VARIABLE_NAME = 'GOPASS_STORE_PASS'
@@ -123,6 +125,8 @@ CMD_OPTION_NAMES = {
     PARAM_DRY_RUN: ['--dry-run', '-d']
 }
 
+SUMMARY_MANAGER = SummaryManager()
+
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 def cli():
@@ -161,6 +165,8 @@ def c_import(path: str, gopass_basepath: str, force: bool, yes: bool, dry_run: b
     :param yes: Automatically answer to gopass requests with "yes" if applicable (see gopass documentation)
     :param dry_run: If set to True no changes will be made to the gopass store
     """
+
+    SUMMARY_MANAGER.clear()
 
     # set custom "editor" that will process the password
     editor_command = "gopass-chrome-importer %s" % CMD_STORE_INTERNAL
@@ -221,7 +227,7 @@ def c_import(path: str, gopass_basepath: str, force: bool, yes: bool, dry_run: b
 
         _run_shell_command(gopass_command)
 
-    echo("Done.", info=True)
+    SUMMARY_MANAGER.print_summary()
 
 
 def _create_secret_content(username: str or None, password: str, mask_pw: bool = False) -> str:
@@ -259,8 +265,10 @@ def echo(text: str, info: bool = False, warn: bool = False, err: bool = False) -
         foreground_color = 'green'
     elif warn:
         foreground_color = 'yellow'
+        SUMMARY_MANAGER.add_warning("", text)
     elif err:
         foreground_color = 'red'
+        SUMMARY_MANAGER.add_error("", text)
     else:
         foreground_color = 'white'
 
@@ -312,11 +320,14 @@ def c_store_internal(file_path: str, force: bool, dry_run: bool):
     if dry_run:
         # just print what would be executed
         secret_content = _create_secret_content(username, password, mask_pw=True)
-        echo("Would import: " + secret_content + '\n')
+        echo("Would import: %s\n" % secret_content, info=True)
+        SUMMARY_MANAGER.add_info("Would import: %s" % final_secret_path)
         return
     else:
         with open(file_path, 'w') as file:
             file.write(secret_content)
+        echo("Imported %s" % final_secret_path, info=True)
+        SUMMARY_MANAGER.add_info("Imported %s" % final_secret_path)
         return
 
 
