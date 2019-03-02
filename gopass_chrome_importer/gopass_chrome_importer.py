@@ -172,6 +172,7 @@ def c_import(path: str, gopass_basepath: str, force: bool, yes: bool, dry_run: b
     if force:
         editor_command += " %s" % get_option_names(PARAM_FORCE)[0]
     if dry_run:
+        echo("This is a dry run. Nothing will be changed.", warn=True)
         editor_command += " %s" % get_option_names(PARAM_DRY_RUN)[0]
     os.environ[EDITOR_ENV_VARIABLE_NAME] = editor_command
 
