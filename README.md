@@ -1,6 +1,8 @@
 # gopass-chrome-importer  [![Build Status](https://travis-ci.org/markusressel/gopass-chrome-importer.svg?branch=master)](https://travis-ci.org/markusressel/gopass-chrome-importer) [![PyPI version](https://badge.fury.io/py/gopass-chrome-importer.svg)](https://badge.fury.io/py/gopass-chrome-importer)
 A simple tool to import Chrome passwords into [gopass](https://github.com/gopasspw/gopass).
 
+[![asciicast](https://asciinema.org/a/Oeq9jhDh2c3wBhl1qGwbu67Jz.svg)](https://asciinema.org/a/Oeq9jhDh2c3wBhl1qGwbu67Jz)
+
 # How it works
 
 **gopass-chrome-importer** parses the `.csv` file that can be exported from chrome
