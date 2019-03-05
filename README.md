@@ -121,7 +121,7 @@ By default **gopass-chrome-importer** will import secrets into an `import/` fold
 use the `-gb` or `--gopass-basepath` option:
 
 ```bash
-gopass-chrome-importer import --path "~/Downloads/Chrome Passwords.csv" --gopass-basepath /test/ --dry-run
+gopass-chrome-importer import --path "~/Downloads/Chrome Passwords.csv" --gopass-basepath "/test/" --dry-run
 ```
 
 ## --yes
@@ -132,7 +132,7 @@ by always using "Y" or the default (if *yes* is not an option). This parameter c
 in **gopass-chrome-importer** and will just pass it on to **gopass**.
 
 ```bash
-gopass-chrome-importer import --path "~/Downloads/Chrome Passwords.csv" --gopass-basepath /test/ --yes --dry-run
+gopass-chrome-importer import --path "~/Downloads/Chrome Passwords.csv" --gopass-basepath "/test/" --yes --dry-run
 ```
 
 ## Overwrite existing passwords/file contents
@@ -143,7 +143,7 @@ to prevent accidentally overwriting of existing passwords.
 
 You can force **gopass-chrome-importer** to ignore this check by using the `-f` or `--force` option.
 
-Although your existing passwords are backed up in a git and (hopefully) synced to a 
+Although your existing passwords are versioned in a git and (hopefully) synced to a 
 server side backend **be careful and think twice before using this option.**
 
 ```bash
