@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+gopass-chrome-importer
+"""
 
 import os
 import subprocess
@@ -6,17 +9,17 @@ from enum import Enum
 
 import click
 
-from gopass_chrome_importer.summary.summary_manager import SummaryManager
-
-SUMMARY_TMP_FILE_ENV_VARIABLE_NAME = 'GOPASS_CHROME_IMPORTER_SUMMARY_TMP_FILE_PATH'
-SECRET_PATH_ENV_VARIABLE_NAME = 'GOPASS_CHROME_IMPORTER_STORE_SECRET_PATH'
-USERNAME_ENV_VARIABLE_NAME = 'GOPASS_CHROME_IMPORTER_STORE_USER'
-PASSWORD_ENV_VARIABLE_NAME = 'GOPASS_CHROME_IMPORTER_STORE_PASS'
-EDITOR_ENV_VARIABLE_NAME = 'EDITOR'
-IPV4_REGEX = "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
+from gopass_chrome_importer import coerce
+from gopass_chrome_importer.const import KEY_USERNAME, KEY_PASSWORD, KEY_URL, KEY_NAME, IPV4_REGEX, \
+    EDITOR_ENV_VARIABLE_NAME, SUMMARY_TMP_FILE_ENV_VARIABLE_NAME, SECRET_PATH_ENV_VARIABLE_NAME, \
+    USERNAME_ENV_VARIABLE_NAME, PASSWORD_ENV_VARIABLE_NAME
+from gopass_chrome_importer.summary_manager import SummaryManager
 
 
 class UrlType(Enum):
+    """
+    URL types that may occur
+    """
     ANDROID = "android"
     IP = "ip"
     DOMAIN = "domain"
@@ -28,7 +31,7 @@ def _run_shell_command(cmd: str, run_as: str = None) -> None:
         cmd = "sudo -u %s %s" % (run_as, cmd)
 
     result = subprocess.call(cmd, shell=True)
-    if result is not 0:
+    if result != 0:
         raise ValueError("An error occurred")
 
 
@@ -45,12 +48,16 @@ def _read_csv(path: str) -> [dict]:
 
     with open(path) as file:
         reader = csv.reader(file, delimiter=',')
+
+        # this is the header of the csv file and can be ignored
+        next(reader)
+
         for row in reader:
             result.append({
-                "name": row[0],
-                "url": row[1],
-                "username": row[2],
-                "password": row[3]
+                KEY_NAME: row[0],
+                KEY_URL: row[1],
+                KEY_USERNAME: row[2],
+                KEY_PASSWORD: row[3]
             })
 
     return result
@@ -68,10 +75,10 @@ def _find_type(url: str) -> UrlType:
 
     if url.startswith("android://"):
         return UrlType.ANDROID
-    elif re.match(IPV4_REGEX, url):
+    if re.search(IPV4_REGEX, url):
         return UrlType.IP
-    else:
-        return UrlType.DOMAIN
+
+    return UrlType.DOMAIN
 
 
 def _format_site(url: str) -> str:
@@ -86,9 +93,25 @@ def _format_site(url: str) -> str:
 
     result = url
     if url_type is UrlType.IP or url_type is UrlType.DOMAIN:
+
+        default_port = None
+        if result.startswith('https://'):
+            default_port = 443
+        if result.startswith('http://'):
+            default_port = 80
+
         result = result.replace('https://', '')
         result = result.replace('http://', '')
         result = result.replace('www.', '')
+
+        # if the port is the default port for the
+        # given protocol we just omit it
+        if default_port:
+            result = result.replace(':{}'.format(default_port), '')
+
+        if '/' in result:
+            # remove any sub path
+            result = result[0:result.index('/')]
 
         if url_type is UrlType.IP:
             result = "ip/" + result
@@ -131,7 +154,9 @@ SUMMARY_MANAGER = SummaryManager()
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 def cli():
-    pass
+    """
+    Main CLI entry point
+    """
 
 
 def get_option_names(parameter: str) -> list:
@@ -141,6 +166,30 @@ def get_option_names(parameter: str) -> list:
     :return: a list of all valid names to use this parameter
     """
     return CMD_OPTION_NAMES[parameter]
+
+
+def _create_secret_path(base_path, name, url, username) -> str:
+    """
+    Generates a secret path for a csv entry
+
+    :param base_path: base path to prepend
+    :param name: name of the entry, if any
+    :param url: url of the entry
+    :param username: username of the entry
+    :return: generated secret path
+    """
+
+    if name:
+        site = _format_site(name)
+    else:
+        site = _format_site(url)
+
+    if username:
+        user = username
+    else:
+        user = "site_pw"
+
+    return "{}{}/{}".format(base_path, site, user)
 
 
 @cli.command(name="import")
@@ -179,32 +228,19 @@ def c_import(path: str, gopass_basepath: str, force: bool, yes: bool, dry_run: b
     # set path to summary tmp file used for this run
     os.environ[SUMMARY_TMP_FILE_ENV_VARIABLE_NAME] = SUMMARY_MANAGER.get_tmp_file_path()
 
-    # TODO: maybe we could use this to be able to only update existing secrets, without creating new ones
+    # maybe we could use this to be able to only update existing secrets, without creating new ones
     # dont know if this is an actual usecase though...
     create_new = True
 
     entries = _read_csv(path)
 
     for entry in entries:
-        if entry.get("name") == "name" and entry.get("url") == "url" and entry.get(
-                "username") == "username" and entry.get("password") == "password":
-            # this is the header of the csv file and can be ignored
-            # it would be possible to just ignore the first line of the csv
-            # but you never know wo might think it's a good idea to delete that...
-            continue
+        name = entry[KEY_NAME]
+        url = entry[KEY_URL]
+        user = entry[KEY_USERNAME]
+        password = entry[KEY_PASSWORD]
 
-        if entry["name"]:
-            site = _format_site(entry["name"])
-        else:
-            site = _format_site(entry["url"])
-
-        if entry["username"]:
-            user = entry["username"]
-        else:
-            user = "site_pw"
-
-        secret_path = "%s%s/%s" % (gopass_basepath, site, user)
-        password = entry["password"]
+        secret_path = _create_secret_path(gopass_basepath, name, url, user)
 
         # this command is a simple workaround to use gopass in a non-interactive way
         # by using the edit command and a 'fake' editor that is this python script and
@@ -234,7 +270,7 @@ def c_import(path: str, gopass_basepath: str, force: bool, yes: bool, dry_run: b
     SUMMARY_MANAGER.print_summary()
 
 
-def _create_secret_content(username: str or None, password: str, mask_pw: bool = False) -> str:
+def _create_secret_content(password: str, username: str or None = None, mask_pw: bool = False) -> str:
     """
     Creates the text that is written to a secret
 
@@ -244,7 +280,7 @@ def _create_secret_content(username: str or None, password: str, mask_pw: bool =
     :return: the secret file content
     """
     if mask_pw:
-        content = len(password) * '*'
+        content = coerce(len(password), min_value=10, max_value=20) * '*'
     else:
         content = password
 
@@ -305,11 +341,11 @@ def c_store_internal(file_path: str, force: bool, dry_run: bool):
     username = os.environ[USERNAME_ENV_VARIABLE_NAME]
     password = os.environ[PASSWORD_ENV_VARIABLE_NAME]
 
-    secret_content = _create_secret_content(username, password)
+    secret_content = _create_secret_content(password, username)
 
     # check if the file is empty
     file_stats = os.stat(file_path)
-    if file_stats.st_size is not 0:
+    if file_stats.st_size != 0:
         # check if existing content matches the one we are about to write
         with open(file_path, 'r') as file:
             existing_content = file.read()
@@ -320,20 +356,20 @@ def c_store_internal(file_path: str, force: bool, dry_run: bool):
         if not force:
             echo("Non-empty file with unequal content will NOT be overwritten: %s" % final_secret_path, warn=True)
             return
-        else:
-            echo("Non-empty file with unequal content WILL BE overwritten: %s" % final_secret_path, warn=True)
+
+        echo("Non-empty file with unequal content WILL BE overwritten: %s" % final_secret_path, warn=True)
 
     if dry_run:
         # just print what would be executed
-        secret_content = _create_secret_content(username, password, mask_pw=True)
+        secret_content = _create_secret_content(password, username, mask_pw=True)
         echo("%s:\n%s\n" % (final_secret_path, secret_content), info=True)
         SUMMARY_MANAGER.add_info("Would import: %s" % final_secret_path)
         return
-    else:
-        with open(file_path, 'w') as file:
-            file.write(secret_content)
-        SUMMARY_MANAGER.add_info("Imported %s" % final_secret_path)
-        return
+
+    with open(file_path, 'w') as file:
+        file.write(secret_content)
+    SUMMARY_MANAGER.add_info("Imported %s" % final_secret_path)
+    return
 
 
 if __name__ == '__main__':

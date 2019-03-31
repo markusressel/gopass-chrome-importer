@@ -1,12 +1,16 @@
+import os
 import subprocess
 
 from setuptools import setup, find_packages
 
 VERSION_NUMBER = "1.1.0"
 
-GIT_BRANCH = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
-GIT_BRANCH = GIT_BRANCH.decode()  # convert to standard string
-GIT_BRANCH = GIT_BRANCH.rstrip()  # remove unnecessary whitespace
+try:
+    GIT_BRANCH = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
+    GIT_BRANCH = GIT_BRANCH.decode()  # convert to standard string
+    GIT_BRANCH = GIT_BRANCH.rstrip()  # remove unnecessary whitespace
+except Exception as ex:
+    GIT_BRANCH = "dev"
 
 if GIT_BRANCH == "master":
     DEVELOPMENT_STATUS = "Development Status :: 5 - Production/Stable"
@@ -24,7 +28,6 @@ else:
 
 
 def readme_type() -> str:
-    import os
     if os.path.exists("README.rst"):
         return "text/x-rst"
     if os.path.exists("README.md"):
@@ -32,7 +35,6 @@ def readme_type() -> str:
 
 
 def readme() -> [str]:
-    import os
     if os.path.exists("README.rst"):
         file_name = 'README.rst'
     elif os.path.exists("README.md"):
@@ -42,14 +44,6 @@ def readme() -> [str]:
 
     with open(file_name) as f:
         return f.read()
-
-
-def install_requirements() -> [str]:
-    return read_requirements_file("requirements.txt")
-
-
-def test_requirements() -> [str]:
-    return read_requirements_file("test_requirements.txt")
 
 
 def read_requirements_file(file_name: str):
@@ -78,8 +72,14 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7'
     ],
-    install_requires=install_requirements(),
-    tests_require=test_requirements(),
+    install_requires=[
+        'click'
+    ],
+    tests_require=[
+        'pytest',
+        'pylint',
+        'flake8',
+    ],
     entry_points={
         'console_scripts': [
             'gopass-chrome-importer=gopass_chrome_importer.gopass_chrome_importer:cli'

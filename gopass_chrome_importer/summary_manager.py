@@ -1,3 +1,7 @@
+"""
+Module for managing summary entries
+"""
+
 import os
 import pickle
 import random
@@ -8,6 +12,10 @@ import click
 
 
 class SummaryManager:
+    """
+    Class used to manage summary entries
+    """
+
     _infos = "infos"
     _warnings = "warnings"
     _errors = "errors"
@@ -53,6 +61,8 @@ class SummaryManager:
         for path in ["/dev/shm", "/tmp"]:
             if os.path.isdir(path):
                 return path
+
+        return None
 
     def get_tmp_file_path(self) -> str:
         """
@@ -125,6 +135,9 @@ class SummaryManager:
         self._write_to_filesystem(summary)
 
     def print_summary(self):
+        """
+        Prints the current state of the summary to the console
+        """
         summary = self.read_from_filesystem()
         infos = summary[self._infos]
         errors = summary[self._errors]
