@@ -291,30 +291,6 @@ def _create_secret_content(password: str, username: str or None = None, mask_pw:
     return content
 
 
-def echo(text: str, info: bool = False, warn: bool = False, err: bool = False) -> None:
-    """
-    Simple wrapper for the click.echo function
-
-    :param text: the text to print
-    :param info: set to true, when this is a info message
-    :param warn: set to true, when this is a warning message
-    :param err: set to true, when this is an error message
-    """
-
-    if info:
-        foreground_color = 'green'
-    elif warn:
-        foreground_color = 'yellow'
-        SUMMARY_MANAGER.add_warning(text)
-    elif err:
-        foreground_color = 'red'
-        SUMMARY_MANAGER.add_error(text)
-    else:
-        foreground_color = 'white'
-
-    click.echo(click.style(text, fg=foreground_color), err=err)
-
-
 @cli.command(name=CMD_STORE_INTERNAL, hidden=True)
 @click.argument('file_path', required=True, type=str)
 @click.option(*get_option_names(PARAM_FORCE), required=False, default=False, is_flag=True,
@@ -370,6 +346,30 @@ def c_store_internal(file_path: str, force: bool, dry_run: bool):
         file.write(secret_content)
     SUMMARY_MANAGER.add_info("Imported %s" % final_secret_path)
     return
+
+
+def echo(text: str, info: bool = False, warn: bool = False, err: bool = False) -> None:
+    """
+    Simple wrapper for the click.echo function
+
+    :param text: the text to print
+    :param info: set to true, when this is a info message
+    :param warn: set to true, when this is a warning message
+    :param err: set to true, when this is an error message
+    """
+
+    if info:
+        foreground_color = 'green'
+    elif warn:
+        foreground_color = 'yellow'
+        SUMMARY_MANAGER.add_warning(text)
+    elif err:
+        foreground_color = 'red'
+        SUMMARY_MANAGER.add_error(text)
+    else:
+        foreground_color = 'white'
+
+    click.echo(click.style(text, fg=foreground_color), err=err)
 
 
 if __name__ == '__main__':
