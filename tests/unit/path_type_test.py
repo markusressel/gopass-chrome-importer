@@ -1,10 +1,9 @@
-import unittest
-
 from gopass_chrome_importer import gopass_chrome_importer
 from gopass_chrome_importer.gopass_chrome_importer import UrlType
+from tests import CliTestBase
 
 
-class PathTypeTests(unittest.TestCase):
+class PathTypeTests(CliTestBase):
     """
     Unit tests
     """
@@ -33,10 +32,11 @@ class PathTypeTests(unittest.TestCase):
         url = "android://biubOBhziubziubIUbhiul56757KJjkjklJI787tnhoihjpoit638790798GBzugigbuGViu_fdsjk78hgHgu-JH6K9NB==@com.paypal.android.p2pmobile/"
         self._assertType(url, UrlType.ANDROID)
 
-    def _assertType(self, url: str, type: UrlType):
+    def _assertType(self, url: str, expected: UrlType):
+        """
+        Helper method to compare the _find_type() method result with an expected type.
+        :param url: the url to use
+        :param expected: the expected result type
+        """
         result = gopass_chrome_importer._find_type(url)
-        self.assertEqual(result, type)
-
-
-if __name__ == '__main__':
-    unittest.main()
+        self.assertEqual(result, expected)

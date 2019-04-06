@@ -1,9 +1,8 @@
-import unittest
-
 from gopass_chrome_importer import gopass_chrome_importer
+from tests import CliTestBase
 
 
-class SecretPathTests(unittest.TestCase):
+class SecretPathTests(CliTestBase):
     """
     Unit tests
     """
@@ -128,7 +127,3 @@ class SecretPathTests(unittest.TestCase):
             url=url)
 
         self.assertEqual(path, expected)
-
-
-if __name__ == '__main__':
-    unittest.main()

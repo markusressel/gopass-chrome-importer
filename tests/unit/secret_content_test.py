@@ -1,9 +1,8 @@
-import unittest
-
 from gopass_chrome_importer import gopass_chrome_importer
+from tests import CliTestBase
 
 
-class SecretContentTests(unittest.TestCase):
+class SecretContentTests(CliTestBase):
     """
     Unit tests
     """
@@ -44,7 +43,3 @@ class SecretContentTests(unittest.TestCase):
             mask_pw=True)
 
         self.assertEqual(content, expected)
-
-
-if __name__ == '__main__':
-    unittest.main()

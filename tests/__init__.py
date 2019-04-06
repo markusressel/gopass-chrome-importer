@@ -51,7 +51,8 @@ class CliTestBase(unittest.TestCase):
     Base class for testing click cli commands
     """
 
-    def _run_cli_cmd(self, prog_name: str = None, args: list = None) -> any:
+    @staticmethod
+    def _run_cli_cmd(prog_name: str = None, args: list = None) -> any:
         """
         Runs a cli command and returns it's output
 
@@ -65,6 +66,5 @@ class CliTestBase(unittest.TestCase):
 
         return cli.main(args=args or (), prog_name=prog_name, standalone_mode=False)
 
-
-if __name__ == '__main__':
-    unittest.main()
+    if __name__ == '__main__':
+        unittest.main()
